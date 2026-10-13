@@ -6,13 +6,6 @@ pipeline {
         REPO_URL = "https://github.com/AdawyDevOps/jenkins-k8s-pipeline.git"
     }
 
-    stages {
-        stage('Getting Repo files') {
-            steps {
-                git branch: "main", credentialsId: 'github-token', url: "${REPO_URL}"
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 script {
@@ -37,16 +30,16 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-token', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh """
-                            sed "s|IMAGE_PLACEHOLDER|\$DOCKER_USERNAME/${APP_NAME}:${BUILD_NUMBER}|g" k8s/deployment.yaml > deployment.yaml
-                            kubectl --kubeconfig /var/jenkins_home/.kube/config apply -f deployment.yaml
-                            kubectl --kubeconfig /var/jenkins_home/.kube/config apply -f k8s/service.yaml
-                        """
-                    }
+       stage('Deploy to Kubernetes') {
+        steps {
+            script {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-token', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh """
+                        sed "s|IMAGE_PLACEHOLDER|\$DOCKER_USERNAME/${APP_NAME}:${BUILD_NUMBER}|g" k8s/deployment.yaml > deployment.yaml
+                        kubectl --kubeconfig /var/jenkins_home/.kube/config apply -f deployment.yaml
+                        kubectl --kubeconfig /var/jenkins_home/.kube/config apply -f k8s/service.yaml
+                    """
                 }
             }
         }
+    }
