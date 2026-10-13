@@ -28,9 +28,9 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-token', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         sh """
-                            echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
-                            docker tag ${APP_NAME}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${APP_NAME}:${BUILD_NUMBER}
-                            docker push ${DOCKER_USERNAME}/${APP_NAME}:${BUILD_NUMBER}
+                            echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin
+                            docker tag ${APP_NAME}:${BUILD_NUMBER} \$DOCKER_USERNAME/${APP_NAME}:${BUILD_NUMBER}
+                            docker push \$DOCKER_USERNAME/${APP_NAME}:${BUILD_NUMBER}
                         """
                     }
                 }
@@ -43,7 +43,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-token', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         sh """
                             ls -l
-                            sed 's|IMAGE_PLACEHOLDER|${DOCKER_USERNAME}/${APP_NAME}:${BUILD_NUMBER}|' k8s/deployment.yaml > deployment.yaml
+                            sed 's|IMAGE_PLACEHOLDER|\$DOCKER_USERNAME/${APP_NAME}:${BUILD_NUMBER}|' k8s/deployment.yaml > deployment.yaml
                             kubectl apply -f deployment.yaml
                             kubectl apply -f k8s/service.yaml
                         """
